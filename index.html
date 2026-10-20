@@ -476,11 +476,21 @@
 
         function updateLabels() {
             playerNames.X = document.getElementById('nameMe').value || 'You';
-            playerNames.O = document.getElementById('nameOpp').value || 'Opponent';
-            if (gameMode === 'local-bot') playerNames.O = document.getElementById('nameOpp').value || '🤖 Bot';
+            
+            if (gameMode === 'online') {
+                // In online mode, opponent name comes from Firebase, not input
+                labelO.textContent = playerNames.O;
+                // Disable opponent name input in online mode
+                document.getElementById('nameOpp').disabled = true;
+                document.getElementById('nameOpp').value = playerNames.O || 'Opponent';
+            } else {
+                playerNames.O = document.getElementById('nameOpp').value || 'Opponent';
+                if (gameMode === 'local-bot') playerNames.O = document.getElementById('nameOpp').value || '🤖 Bot';
+                document.getElementById('nameOpp').disabled = false;
+                labelO.textContent = playerNames.O;
+            }
 
             labelX.textContent = playerNames.X;
-            labelO.textContent = playerNames.O;
             scoreX.textContent = scores.X;
             scoreO.textContent = scores.O;
             scoreDraw.textContent = scores.Draw;
@@ -550,7 +560,7 @@
                 if (data.playerO) { alert("Room is full"); return; }
 
                 mySymbol = 'O';
-                roomRef.update({ playerO: document.getElementById('nameOpp').value || 'Opponent', status: 'playing' });
+                roomRef.update({ playerO: document.getElementById('nameMe').value || 'Opponent', status: 'playing' });
 
                 roomListener = roomRef.on('value', (snap) => {
                     const d = snap.val();
@@ -569,10 +579,17 @@
 
             // Sync input fields with Firebase names so both players see live names
             document.getElementById('nameMe').value = playerNames.X;
-            document.getElementById('nameOpp').value = playerNames.O;
+            
+            if (data.playerO) {
+                document.getElementById('nameOpp').value = playerNames.O;
+                labelO.textContent = playerNames.O;
+            } else {
+                document.getElementById('nameOpp').value = 'Waiting for opponent...';
+                labelO.textContent = 'Waiting...';
+            }
+            document.getElementById('nameOpp').disabled = true;
 
             labelX.textContent = playerNames.X;
-            labelO.textContent = playerNames.O;
 
             // Sync board
             if (data.board) {
