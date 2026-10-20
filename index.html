@@ -591,6 +591,17 @@
 
             labelX.textContent = playerNames.X;
 
+            // Sync scores from Firebase
+            if (data.scoreX !== undefined) scores.X = data.scoreX;
+            if (data.scoreO !== undefined) scores.O = data.scoreO;
+            if (data.scoreDraw !== undefined) scores.Draw = data.scoreDraw;
+            if (data.gamesPlayed !== undefined) gamesPlayed = data.gamesPlayed;
+            
+            scoreX.textContent = scores.X;
+            scoreO.textContent = scores.O;
+            scoreDraw.textContent = scores.Draw;
+            updateStats();
+
             // Sync board
             if (data.board) {
                 board = data.board;
@@ -819,9 +830,16 @@
             }
             updateStats();
             if (gameMode==='online') {
-                // Push result to Firebase
+                // Push result AND scores to Firebase
                 if (roomRef) {
-                    roomRef.update({ status: 'gameover', winner: isDraw ? 'Draw' : winnerSymbol });
+                    roomRef.update({ 
+                        status: 'gameover', 
+                        winner: isDraw ? 'Draw' : winnerSymbol,
+                        scoreX: scores.X,
+                        scoreO: scores.O,
+                        scoreDraw: scores.Draw,
+                        gamesPlayed: gamesPlayed
+                    });
                 }
             }
         }
