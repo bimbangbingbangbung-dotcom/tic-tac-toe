@@ -632,16 +632,22 @@
                 // Board full, no winner — push draw to Firebase
                 gameActive = false;
                 endGame(true);
-            } else if (data.winner) {
-                // Firebase already has the winner (synced from other player)
+            } else if (data.winner && !gameActive) {
+                // Firebase already has the winner (synced from other player or ourselves)
+                // Just show the win UI — do NOT call endGame again to avoid double-scoring
                 gameActive = false;
                 winningCombo = findWinningCombo(board, data.winner);
                 drawWinLine();
                 cells.forEach((c,i) => { if (winningCombo && winningCombo.includes(i)) c.classList.add('winning-cell'); });
                 if (data.winner === 'Draw') {
-                    endGame(true);
+                    statusDisplay.textContent = "It's a draw!";
+                    statusDisplay.style.color = 'var(--win-color)';
+                    showModal("It's a Draw!","Nobody wins this round.");
                 } else {
-                    endGame(false, data.winner);
+                    const winnerName = playerNames[data.winner] || data.winner;
+                    statusDisplay.textContent = winnerName + " wins!";
+                    statusDisplay.style.color = data.winner==='X' ? 'var(--x-color)' : 'var(--o-color)';
+                    showModal(winnerName + " Wins!", "Congratulations, " + winnerName + "!");
                 }
             }
         }
