@@ -1037,9 +1037,9 @@
         function requestPlayAgain() {
             document.getElementById('modal').style.display = 'none';
             if (gameMode === 'online' && firebaseInitialized && roomRef) {
-                // Host requests play again
+                // Host requests play again - show confirmation to opponent only
                 roomRef.update({ playAgainRequested: mySymbol, playAgainConfirmed: { X: false, O: false } });
-                showPlayAgainModal("You requested to play again. Waiting for opponent to confirm...");
+                showPlayAgainModal("Waiting for opponent to confirm play again...");
             } else {
                 // Local mode - just reset game
                 doResetGame();
@@ -1058,9 +1058,8 @@
             if (accept) {
                 roomRef.update({ [`playAgainConfirmed.${mySymbol}`]: true });
             } else {
-                // Decline - go to lobby
-                roomRef.update({ playAgainRequested: null, playAgainConfirmed: { X: false, O: false } });
-                goToLobby();
+                // Decline - both go to lobby
+                roomRef.update({ playAgainRequested: null, playAgainConfirmed: { X: false, O: false }, lobbyRequested: mySymbol });
             }
         }
 
