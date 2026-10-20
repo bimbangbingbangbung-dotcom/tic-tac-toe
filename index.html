@@ -667,6 +667,11 @@
                 roomRef.update({ playAgainRequested: null, playAgainConfirmed: { X: false, O: false } });
             }
 
+            // Handle lobby request from opponent - both go to lobby
+            if (data.lobbyRequested && data.lobbyRequested !== mySymbol) {
+                goToLobby();
+            }
+
             // Sync board
             if (data.board) {
                 board = data.board;
@@ -1061,6 +1066,9 @@
 
         function goToLobby() {
             gameActive = false;
+            if (gameMode === 'online' && firebaseInitialized && roomRef) {
+                roomRef.update({ lobbyRequested: mySymbol, playAgainRequested: null, playAgainConfirmed: { X: false, O: false } });
+            }
             // Hide game elements
             document.querySelectorAll('.game-hidden').forEach(el => el.classList.add('game-hidden'));
             // Show controls panel (room selection)
