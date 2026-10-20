@@ -626,10 +626,42 @@
         }
 
         function makeOnlineMove(index) {
-            const updates = {};
-            updates['board/' + index] = mySymbol;
-            updates['currentPlayer'] = mySymbol === 'X' ? 'O' : 'X';
-            roomRef.update(updates);
+            // Update local board immediately
+            board[index] = mySymbol;
+            const cell = cells[index];
+            cell.textContent = mySymbol;
+            cell.classList.add('taken', mySymbol.toLowerCase());
+            Audio.move();
+
+            // Check for win/draw locally
+            const boardWinner = checkWinnerStatic(board);
+            const isDraw = !boardWinner && !board.includes('');
+
+            if (boardWinner) {
+                // I won — push winner to Firebase and end game
+                roomRef.update({ 
+                    board: board, 
+                    currentPlayer: mySymbol === 'X' ? 'O' : 'X',
+                    status: 'gameover',
+                    winner: boardWinner
+                });
+                endGame(false, boardWinner);
+            } else if (isDraw) {
+                // Draw — push to Firebase and end game
+                roomRef.update({ 
+                    board: board, 
+                    currentPlayer: mySymbol === 'X' ? 'O' : 'X',
+                    status: 'gameover',
+                    winner: 'Draw'
+                });
+                endGame(true);
+            } else {
+                // Game continues — push move to Firebase
+                const updates = {};
+                updates['board/' + index] = mySymbol;
+                updates['currentPlayer'] = mySymbol === 'X' ? 'O' : 'X';
+                roomRef.update(updates);
+            }
         }
 
         /* ============================================
