@@ -485,6 +485,11 @@
             scoreO.textContent = scores.O;
             scoreDraw.textContent = scores.Draw;
             updateStats();
+
+            // Sync name changes to Firebase in online mode
+            if (gameMode === 'online' && roomRef) {
+                roomRef.update({ playerX: playerNames.X, playerO: playerNames.O });
+            }
         }
 
         function updateStats() {
@@ -561,6 +566,11 @@
             // Update names from Firebase
             if (data.playerX) playerNames.X = data.playerX;
             if (data.playerO) playerNames.O = data.playerO;
+
+            // Sync input fields with Firebase names so both players see live names
+            document.getElementById('nameMe').value = playerNames.X;
+            document.getElementById('nameOpp').value = playerNames.O;
+
             labelX.textContent = playerNames.X;
             labelO.textContent = playerNames.O;
 
