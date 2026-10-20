@@ -206,6 +206,11 @@
         }
         .firebase-notice.show { display: block; }
 
+        /* Hide game elements until mode is selected */
+        .game-hidden {
+            display: none !important;
+        }
+
         @media (max-width: 500px) {
             .board { grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(3, 80px); gap: 8px; }
             .cell { width: 80px; height: 80px; font-size: 2rem; }
@@ -274,7 +279,7 @@
     </div>
 
     <!-- Scoreboard -->
-    <div class="scoreboard">
+    <div class="scoreboard game-hidden">
         <div class="score-card x-player">
             <h3 id="labelX">You</h3>
             <p id="scoreX">0</p>
@@ -293,10 +298,10 @@
     </div>
 
     <!-- Status -->
-    <div id="status">Select a mode to start</div>
+    <div id="status" class="game-hidden">Select a mode to start</div>
 
     <!-- Board -->
-    <div class="board-wrapper">
+    <div class="board-wrapper game-hidden">
         <div class="win-line" id="winLine"></div>
         <div class="board" id="board">
             <div class="cell" data-index="0" onclick="handleCellClick(0)"></div>
@@ -312,7 +317,7 @@
     </div>
 
     <!-- Actions -->
-    <div class="actions">
+    <div class="actions game-hidden">
         <button class="btn-primary" onclick="resetGame()">🔄 New Game</button>
         <button onclick="undoMove()" id="btnUndo" style="display:none;">↩️ Undo</button>
         <button class="btn-danger" onclick="resetScores()">🗑️ Reset Stats</button>
@@ -459,6 +464,9 @@
 
             difficultyGroup.style.display = mode === 'local-bot' ? 'block' : 'none';
             roomSection.style.display = mode === 'online' ? 'block' : 'none';
+
+            // Show game elements
+            document.querySelectorAll('.game-hidden').forEach(el => el.classList.remove('game-hidden'));
 
             if (mode === 'online') initFirebase();
 
