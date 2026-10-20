@@ -318,7 +318,6 @@
 
     <!-- Actions -->
     <div class="actions game-hidden">
-        <button class="btn-primary" onclick="resetGame()">🔄 New Game</button>
         <button onclick="undoMove()" id="btnUndo" class="game-hidden">↩️ Undo</button>
         <button class="btn-danger" onclick="resetScores()">🗑️ Reset Stats</button>
     </div>
@@ -333,7 +332,22 @@
         <div class="modal-content">
             <h2 id="modalTitle">Game Over!</h2>
             <p id="modalMessage">Winner!</p>
-            <button class="btn-primary" onclick="closeModal()">Play Again</button>
+            <div style="display:flex; gap:15px; justify-content:center;">
+                <button class="btn-primary" onclick="requestPlayAgain()">Play Again</button>
+                <button class="btn-danger" onclick="closeModalAndGoLobby()">Back to Lobby</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Play Again Confirmation Modal -->
+    <div class="modal" id="playAgainModal">
+        <div class="modal-content">
+            <h2 id="playAgainModalTitle">Play Again?</h2>
+            <p id="playAgainModalMessage"></p>
+            <div style="display:flex; gap:15px; justify-content:center;">
+                <button class="btn-primary" onclick="confirmPlayAgain(true)">Yes</button>
+                <button class="btn-danger" onclick="confirmPlayAgain(false)">No</button>
+            </div>
         </div>
     </div>
 
@@ -640,6 +654,19 @@
                 roomRef.update({ newGameRequested: null, newGameConfirmed: { X: false, O: false } });
             }
 
+            // Handle play again requests
+            if (data.playAgainRequested && data.playAgainRequested !== mySymbol) {
+                // Opponent requested play again - show confirmation
+                const requesterName = data.playAgainRequested === 'X' ? playerNames.X : playerNames.O;
+                showPlayAgainModal(requesterName + " wants to play again. Confirm?");
+            }
+
+            // Check if both players confirmed play again - actually reset game
+            if (data.playAgainConfirmed && data.playAgainConfirmed.X && data.playAgainConfirmed.O) {
+                doResetGame();
+                roomRef.update({ playAgainRequested: null, playAgainConfirmed: { X: false, O: false } });
+            }
+
             // Sync board
             if (data.board) {
                 board = data.board;
@@ -882,7 +909,9 @@
                         scoreX: scores.X,
                         scoreO: scores.O,
                         scoreDraw: scores.Draw,
-                        gamesPlayed: gamesPlayed
+                        gamesPlayed: gamesPlayed,
+                        playAgainRequested: null,
+                        playAgainConfirmed: { X: false, O: false }
                     });
                 }
             }
@@ -922,7 +951,8 @@
             modalTitle.textContent=title; modalMessage.textContent=msg;
             modal.style.display='flex';
         }
-        function closeModal(){ modal.style.display='none'; resetGame(); }
+        function closeModal(){ modal.style.display='none'; }
+        function closeModalAndGoLobby(){ modal.style.display='none'; goToLobby(); }
         function resetGame(){
             if (gameMode === 'online' && firebaseInitialized && roomRef) {
                 // Request new game via Firebase - both players must confirm
@@ -997,6 +1027,51 @@
                 roomRef.update({ resetRequested: null, resetConfirmed: { X: false, O: false } });
                 roomRef.update({ newGameRequested: null, newGameConfirmed: { X: false, O: false } });
             }
+        }
+
+        function requestPlayAgain() {
+            document.getElementById('modal').style.display = 'none';
+            if (gameMode === 'online' && firebaseInitialized && roomRef) {
+                // Host requests play again
+                roomRef.update({ playAgainRequested: mySymbol, playAgainConfirmed: { X: false, O: false } });
+                showPlayAgainModal("You requested to play again. Waiting for opponent to confirm...");
+            } else {
+                // Local mode - just reset game
+                doResetGame();
+            }
+        }
+
+        function showPlayAgainModal(message) {
+            document.getElementById('playAgainModalMessage').textContent = message;
+            document.getElementById('playAgainModal').style.display = 'flex';
+        }
+
+        function confirmPlayAgain(accept) {
+            document.getElementById('playAgainModal').style.display = 'none';
+            if (gameMode !== 'online' || !firebaseInitialized || !roomRef) return;
+
+            if (accept) {
+                roomRef.update({ [`playAgainConfirmed.${mySymbol}`]: true });
+            } else {
+                // Decline - go to lobby
+                roomRef.update({ playAgainRequested: null, playAgainConfirmed: { X: false, O: false } });
+                goToLobby();
+            }
+        }
+
+        function goToLobby() {
+            gameActive = false;
+            // Hide game elements
+            document.querySelectorAll('.game-hidden').forEach(el => el.classList.add('game-hidden'));
+            // Show controls panel (room selection)
+            document.querySelector('.controls-panel').style.display = 'grid';
+            document.querySelector('.room-section').style.display = 'block';
+            // Hide scoreboard, status, board, actions
+            document.getElementById('scoreboardEl').style.display = 'none';
+            document.getElementById('status').style.display = 'none';
+            document.querySelector('.board-wrapper').style.display = 'none';
+            document.querySelector('.actions').style.display = 'none';
+            statusDisplay.textContent = "Select a mode to start";
         }
 
         /* ============================================
