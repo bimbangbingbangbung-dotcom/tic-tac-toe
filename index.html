@@ -571,8 +571,23 @@
             statusDisplay.textContent = turnName;
             statusDisplay.style.color = (gameActive && mySymbol === currentPlayer) ? 'var(--x-color)' : 'var(--text-muted)';
 
-            // Game over?
-            if (data.winner) {
+            // Check for win/draw from synced board
+            const boardWinner = checkWinnerStatic(board);
+            const isDraw = !boardWinner && !board.includes('');
+
+            if (boardWinner && !data.winner) {
+                // Someone just won — push to Firebase
+                gameActive = false;
+                winningCombo = findWinningCombo(board, boardWinner);
+                drawWinLine();
+                cells.forEach((c,i) => { if (winningCombo && winningCombo.includes(i)) c.classList.add('winning-cell'); });
+                endGame(false, boardWinner);
+            } else if (isDraw && !data.winner) {
+                // Board full, no winner — push draw to Firebase
+                gameActive = false;
+                endGame(true);
+            } else if (data.winner) {
+                // Firebase already has the winner (synced from other player)
                 gameActive = false;
                 winningCombo = findWinningCombo(board, data.winner);
                 drawWinLine();
