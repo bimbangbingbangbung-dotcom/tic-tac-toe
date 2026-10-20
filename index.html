@@ -627,6 +627,19 @@
                 roomRef.update({ resetRequested: null, resetConfirmed: { X: false, O: false } });
             }
 
+            // Handle new game requests
+            if (data.newGameRequested && data.newGameRequested !== mySymbol) {
+                // Opponent requested new game - show confirmation
+                const requesterName = data.newGameRequested === 'X' ? playerNames.X : playerNames.O;
+                showResetModal(requesterName + " wants to start a new game. Confirm?");
+            }
+
+            // Check if both players confirmed new game - actually reset game
+            if (data.newGameConfirmed && data.newGameConfirmed.X && data.newGameConfirmed.O) {
+                doResetGame();
+                roomRef.update({ newGameRequested: null, newGameConfirmed: { X: false, O: false } });
+            }
+
             // Sync board
             if (data.board) {
                 board = data.board;
@@ -911,6 +924,16 @@
         }
         function closeModal(){ modal.style.display='none'; resetGame(); }
         function resetGame(){
+            if (gameMode === 'online' && firebaseInitialized && roomRef) {
+                // Request new game via Firebase - both players must confirm
+                roomRef.update({ newGameRequested: mySymbol, newGameConfirmed: { X: false, O: false } });
+                showResetModal("You requested a new game. Waiting for opponent to confirm...");
+                return;
+            }
+            doResetGame();
+        }
+
+        function doResetGame(){
             board=['','','','','','','','',''];
             moveHistory=[]; gameActive=true; currentPlayer='X';
             winningCombo=null; winLine.style.width='0';
@@ -966,11 +989,13 @@
             if (gameMode !== 'online' || !firebaseInitialized || !roomRef) return;
 
             if (accept) {
-                // Confirm the reset
+                // Confirm whatever was requested (reset scores or new game)
                 roomRef.update({ [`resetConfirmed.${mySymbol}`]: true });
+                roomRef.update({ [`newGameConfirmed.${mySymbol}`]: true });
             } else {
-                // Cancel - clear the request
+                // Cancel - clear all requests
                 roomRef.update({ resetRequested: null, resetConfirmed: { X: false, O: false } });
+                roomRef.update({ newGameRequested: null, newGameConfirmed: { X: false, O: false } });
             }
         }
 
