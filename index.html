@@ -491,7 +491,7 @@
             
             if (gameMode === 'online') {
                 // In online mode, opponent name comes from Firebase, not input
-                labelO.textContent = playerNames.O;
+                labelO.textContent = playerNames.O + ' (Joined)';
                 // Disable opponent name input in online mode
                 document.getElementById('nameOpp').disabled = true;
                 document.getElementById('nameOpp').value = playerNames.O || 'Opponent';
@@ -499,10 +499,10 @@
                 playerNames.O = document.getElementById('nameOpp').value || 'Opponent';
                 if (gameMode === 'local-bot') playerNames.O = document.getElementById('nameOpp').value || '🤖 Bot';
                 document.getElementById('nameOpp').disabled = false;
-                labelO.textContent = playerNames.O + (gameMode === 'online' && mySymbol === 'O' ? ' (Host)' : gameMode === 'online' ? ' (Joined)' : '');
+                labelO.textContent = playerNames.O + ' (Joined)';
             }
 
-            labelX.textContent = playerNames.X + (gameMode === 'online' && mySymbol === 'X' ? ' (Host)' : gameMode === 'online' ? ' (Joined)' : '');
+            labelX.textContent = playerNames.X + ' (Host)';
             scoreX.textContent = scores.X;
             scoreO.textContent = scores.O;
             scoreDraw.textContent = scores.Draw;
@@ -594,14 +594,14 @@
             
             if (data.playerO) {
                 document.getElementById('nameOpp').value = playerNames.O;
-                labelO.textContent = playerNames.O + (gameMode === 'online' && mySymbol === 'O' ? ' (Host)' : gameMode === 'online' ? ' (Joined)' : '');
+                labelO.textContent = playerNames.O + ' (Joined)';
             } else {
                 document.getElementById('nameOpp').value = 'Waiting for opponent...';
                 labelO.textContent = 'Waiting...';
             }
             document.getElementById('nameOpp').disabled = true;
 
-            labelX.textContent = playerNames.X + (gameMode === 'online' && mySymbol === 'X' ? ' (Host)' : gameMode === 'online' ? ' (Joined)' : '');
+            labelX.textContent = playerNames.X + ' (Host)';
 
             // Sync scores from Firebase
             if (data.scoreX !== undefined) scores.X = data.scoreX;
