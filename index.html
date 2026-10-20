@@ -252,11 +252,11 @@
         <!-- Names -->
         <div class="control-group">
             <label>Your Name</label>
-            <input type="text" id="nameMe" value="You" maxlength="12">
+            <input type="text" id="nameMe" value="You" maxlength="12" oninput="updateLabels()">
         </div>
         <div class="control-group">
             <label>Opponent Name</label>
-            <input type="text" id="nameOpp" value="Opponent" maxlength="12">
+            <input type="text" id="nameOpp" value="Opponent" maxlength="12" oninput="updateLabels()">
         </div>
     </div>
 
@@ -537,7 +537,7 @@
                 if (data.playerO) { alert("Room is full"); return; }
 
                 mySymbol = 'O';
-                roomRef.update({ playerO: document.getElementById('nameMe').value || 'Opponent', status: 'playing' });
+                roomRef.update({ playerO: document.getElementById('nameOpp').value || 'Opponent', status: 'playing' });
 
                 roomListener = roomRef.on('value', (snap) => {
                     const d = snap.val();
@@ -578,9 +578,9 @@
                 drawWinLine();
                 cells.forEach((c,i) => { if (winningCombo && winningCombo.includes(i)) c.classList.add('winning-cell'); });
                 if (data.winner === 'Draw') {
-                    endGameOnline(true);
+                    endGame(true);
                 } else {
-                    endGameOnline(false, data.winner);
+                    endGame(false, data.winner);
                 }
             }
         }
