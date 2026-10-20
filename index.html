@@ -319,7 +319,7 @@
     <!-- Actions -->
     <div class="actions game-hidden">
         <button class="btn-primary" onclick="resetGame()">🔄 New Game</button>
-        <button onclick="undoMove()" id="btnUndo" style="display:none;">↩️ Undo</button>
+        <button onclick="undoMove()" id="btnUndo" class="game-hidden">↩️ Undo</button>
         <button class="btn-danger" onclick="resetScores()">🗑️ Reset Stats</button>
     </div>
 
@@ -465,8 +465,8 @@
             difficultyGroup.style.display = mode === 'local-bot' ? 'block' : 'none';
             roomSection.style.display = mode === 'online' ? 'block' : 'none';
 
-            // Show game elements
-            document.querySelectorAll('.game-hidden').forEach(el => el.classList.remove('game-hidden'));
+            // Show game elements (but keep undo hidden for now)
+            document.querySelectorAll('.game-hidden:not(#btnUndo)').forEach(el => el.classList.remove('game-hidden'));
 
             if (mode === 'online') initFirebase();
 
