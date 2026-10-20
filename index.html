@@ -487,10 +487,10 @@
                 playerNames.O = document.getElementById('nameOpp').value || 'Opponent';
                 if (gameMode === 'local-bot') playerNames.O = document.getElementById('nameOpp').value || '🤖 Bot';
                 document.getElementById('nameOpp').disabled = false;
-                labelO.textContent = playerNames.O;
+                labelO.textContent = playerNames.O + (gameMode === 'online' && mySymbol === 'O' ? ' (Host)' : gameMode === 'online' ? ' (Joined)' : '');
             }
 
-            labelX.textContent = playerNames.X;
+            labelX.textContent = playerNames.X + (gameMode === 'online' && mySymbol === 'X' ? ' (Host)' : gameMode === 'online' ? ' (Joined)' : '');
             scoreX.textContent = scores.X;
             scoreO.textContent = scores.O;
             scoreDraw.textContent = scores.Draw;
@@ -543,7 +543,7 @@
                 handleOnlineState(data);
             });
 
-            statusDisplay.textContent = "Room created! Share code: " + roomId + " — Waiting for opponent...";
+            statusDisplay.textContent = "Room created! Share code: " + roomId + " — You are Host (X). Waiting for opponent...";
             gameActive = false;
         }
 
@@ -568,7 +568,7 @@
                     handleOnlineState(d);
                 });
 
-                statusDisplay.textContent = "Joined room " + code + "! You are O.";
+                statusDisplay.textContent = "Joined room " + code + "! You are Player O (Joined).";
             }).catch(err => { console.error(err); alert("Error joining room"); });
         }
 
@@ -582,14 +582,14 @@
             
             if (data.playerO) {
                 document.getElementById('nameOpp').value = playerNames.O;
-                labelO.textContent = playerNames.O;
+                labelO.textContent = playerNames.O + (gameMode === 'online' && mySymbol === 'O' ? ' (Host)' : gameMode === 'online' ? ' (Joined)' : '');
             } else {
                 document.getElementById('nameOpp').value = 'Waiting for opponent...';
                 labelO.textContent = 'Waiting...';
             }
             document.getElementById('nameOpp').disabled = true;
 
-            labelX.textContent = playerNames.X;
+            labelX.textContent = playerNames.X + (gameMode === 'online' && mySymbol === 'X' ? ' (Host)' : gameMode === 'online' ? ' (Joined)' : '');
 
             // Sync scores from Firebase
             if (data.scoreX !== undefined) scores.X = data.scoreX;
